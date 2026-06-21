@@ -172,8 +172,8 @@
     /* Fade-in animation */
     .reveal {
       opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
+      transform: translateY(35px);
+      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .reveal.visible {
@@ -245,6 +245,38 @@
         radial-gradient(ellipse at 20% 80%, rgba(194, 112, 61, 0.08) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 20%, rgba(194, 112, 61, 0.05) 0%, transparent 40%);
       pointer-events: none;
+      animation: pulseBg 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseBg {
+      0% { opacity: 0.7; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* Subtle mobile background lines */
+    .hero-mobile-bg {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.15;
+    }
+
+    .hero-mobile-bg svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-mobile-bg path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: dash 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes dash {
+      0% { stroke-dashoffset: 1000; }
+      100% { stroke-dashoffset: 0; }
     }
 
     .hero-grid {
@@ -300,6 +332,20 @@
       max-width: 420px;
     }
 
+    .hero-blob {
+      position: absolute;
+      inset: -15%;
+      background: rgba(212, 200, 184, 0.25);
+      z-index: -1;
+      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+      animation: morph 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes morph {
+      0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    }
+
     .hero-photo {
       width: 100%;
       height: auto;
@@ -307,6 +353,8 @@
       object-fit: contain;
       object-position: bottom center;
       filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+      -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
     }
 
     .hero-photo-fallback {
@@ -719,13 +767,22 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .hero-grid,
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
       .about-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
       }
 
-      .hero-visual { order: -1; }
-      .hero-photo-wrap { max-width: 280px; margin: 0 auto; }
+      /* Stack photo top, text below */
+      .hero-visual { order: -1; align-items: flex-end; }
+      .hero-photo-wrap { max-width: 240px; margin: 0 auto; }
+      .about-photo-wrap { max-width: 220px; margin: 0 auto; }
+      
+      .hero-mobile-bg { display: block; }
+      .hero-chart { display: none; } /* Hide the rigid desktop chart */
 
       .comp-grid,
       .project-grid {
@@ -737,6 +794,18 @@
     }
 
     @media (max-width: 640px) {
+      .hero-headline {
+        font-size: 1.85rem;
+        margin-bottom: 1rem;
+      }
+      .hero-eyebrow {
+        margin-bottom: 1rem;
+      }
+      .hero-tagline {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+      }
+
       .nav-links {
         display: none;
         position: absolute;
@@ -789,6 +858,12 @@
 
   <!-- Hero -->
   <section class="hero" id="hero">
+    <div class="hero-mobile-bg" aria-hidden="true">
+      <svg viewBox="0 0 400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M-50 200 C 100 200, 50 400, 250 400 S 400 600, 500 600" stroke="#C2703D" stroke-width="2" opacity="0.3"/>
+        <path d="M-50 250 C 120 220, 80 450, 200 500 S 350 700, 450 650" stroke="#6B5A4E" stroke-width="1.5" opacity="0.2"/>
+      </svg>
+    </div>
     <div class="container hero-grid">
       <div class="hero-content reveal">
         <p class="hero-eyebrow">Aby Krishna &nbsp;|&nbsp; Data & Project Control Engineer</p>
@@ -801,6 +876,7 @@
       </div>
       <div class="hero-visual reveal reveal-delay-2">
         <div class="hero-photo-wrap">
+          <div class="hero-blob"></div>
           <img
             src="ME2_no_bg.png"
             alt="Aby Krishna — Data & Project Control Engineer"
@@ -917,7 +993,7 @@
             <h3>FabTrack Pro</h3>
             <p>Custom fabrication tracking dashboard with stage progress, supervisor performance metrics, and drill-through reports for shop-floor visibility.</p>
             <div class="project-tags">
-              <span class="tag">Power BI</span><span class="tag">DAX</span><span class="tag">SQL</span>
+              <span class="tag">AI powered build</span><span class="tag">Prompt engineering</span><span class="tag">Dashboard design</span>
             </div>
           </div>
         </article>
@@ -1033,7 +1109,8 @@
           entries.forEach(function (entry) {
             if (entry.isIntersecting) {
               entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
+            } else {
+              entry.target.classList.remove('visible');
             }
           });
         }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
